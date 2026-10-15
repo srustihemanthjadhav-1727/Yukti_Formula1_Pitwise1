@@ -1,0 +1,220 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PitWise</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- Top bar: shown after login. Profile sits on the right. -->
+<header class="appbar" id="appbar" hidden>
+  <div class="brand">
+    <h1>Pit<span>Wise</span></h1>
+    <p class="tagline">Simulated race conditions. Not live Formula 1 data.</p>
+  </div>
+  <div class="profile">
+    <div class="avatar" id="avatar" aria-hidden="true">?</div>
+    <div class="profile-text">
+      <strong id="profile-name">Driver</strong>
+      <small id="profile-team">No team</small>
+    </div>
+    <button type="button" class="ghost small" id="logout">Log out</button>
+  </div>
+</header>
+
+<nav class="topnav" id="topnav" aria-label="Pages" hidden>
+  <a href="#dashboard" data-page="dashboard">Dashboard</a>
+  <a href="#conditions" data-page="conditions">Race conditions</a>
+  <a href="#strategy" data-page="strategy">Strategy</a>
+  <a href="#demo" data-page="demo">Demo &amp; guide</a>
+</nav>
+
+<!-- Page 1: login -->
+<section class="page page-login" id="page-login" hidden>
+  <div class="hero">
+    <p class="eyebrow">Formula 1 · Pit strategy</p>
+    <h2 class="hero-title">Turn uncertainty into a race-winning call.</h2>
+    <p>PitWise runs 2,000 simulated races with Safety Cars, weather changes and rival moves. It then shows which pit strategy gives you the best chance to win.</p>
+    <ul class="hero-list">
+      <li>Win chance for every strategy</li>
+      <li>Lap-by-lap time loss chart</li>
+      <li>Demo video and step-by-step guide</li>
+    </ul>
+  </div>
+  <div class="card">
+    <h2>Driver login</h2>
+    <form id="login-form" class="login-form" novalidate>
+      <div class="field">
+        <label for="login-name">Driver name</label>
+        <input type="text" id="login-name" maxlength="30" placeholder="e.g. Srusti" autocomplete="name">
+      </div>
+      <div class="field">
+        <label for="login-team">Team (optional)</label>
+        <input type="text" id="login-team" maxlength="30" placeholder="e.g. Team Alpha" autocomplete="organization">
+      </div>
+      <button type="submit" class="primary big">Log in</button>
+      <p class="status" id="login-error" role="alert"></p>
+    </form>
+    <p class="note">Prototype login: no password is checked. Your name is saved only in this browser.</p>
+  </div>
+</section>
+
+<!-- Page 2: race dashboard -->
+<section class="page page-narrow" id="page-dashboard" hidden>
+  <div class="card">
+    <h2>Race dashboard</h2>
+    <div class="stats">
+      <div class="stat"><small>Current lap · <span id="s-left">22</span> left</small><b id="s-lap">31 / 53</b></div>
+      <div class="stat"><small>Driver position</small><b id="s-pos">P3</b></div>
+      <div class="stat"><small>Tyre wear</small><b id="s-wear">80%</b></div>
+      <div class="stat"><small>Weather</small><b id="s-weather">Dry</b></div>
+      <div class="stat"><small>Safety Car</small><b id="s-sc">Inactive</b></div>
+      <div class="stat"><small>Rival</small><b id="s-rival">Staying out</b></div>
+    </div>
+  </div>
+  <div class="page-actions">
+    <button type="button" class="primary" data-go="conditions">Next: race conditions →</button>
+  </div>
+</section>
+
+<!-- Page 3: race conditions. Analyse race opens the strategy page. -->
+<section class="page page-narrow" id="page-conditions" hidden>
+  <div class="card">
+    <h2>Race conditions</h2>
+
+    <div class="field">
+      <label for="lap">Current lap (1 to 52)</label>
+      <input type="number" id="lap" min="1" max="52" value="31">
+    </div>
+
+    <div class="field">
+      <label for="position">Driver position (1 to 20)</label>
+      <input type="number" id="position" min="1" max="20" value="3">
+    </div>
+
+    <div class="field">
+      <label for="wear">Tyre wear <output id="wear-out">80%</output></label>
+      <input type="range" id="wear" min="20" max="100" step="1" value="80">
+    </div>
+
+    <div class="field">
+      <span class="lbl">Weather</span>
+      <div class="choices">
+        <label class="opt"><input type="radio" name="weather" value="dry" checked> Dry</label>
+        <label class="opt"><input type="radio" name="weather" value="rain"> Rain</label>
+      </div>
+    </div>
+
+    <div class="field">
+      <span class="lbl">Safety Car</span>
+      <div class="choices">
+        <label class="opt"><input type="radio" name="sc" value="off" checked> Inactive</label>
+        <label class="opt"><input type="radio" name="sc" value="on"> Active</label>
+      </div>
+    </div>
+
+    <div class="field">
+      <span class="lbl">Rival pit call</span>
+      <div class="choices">
+        <label class="opt"><input type="radio" name="rival" value="no" checked> Staying out</label>
+        <label class="opt"><input type="radio" name="rival" value="yes"> Pitting now</label>
+      </div>
+    </div>
+
+    <button id="analyse" type="button" class="primary big">Analyse race</button>
+    <p class="status" id="status" role="status" aria-live="polite"></p>
+  </div>
+  <div class="page-actions">
+    <button type="button" class="ghost" data-go="dashboard">← Dashboard</button>
+  </div>
+</section>
+
+<!-- Page 4: strategy recommendation, comparison and lap-by-lap chart -->
+<section class="page page-wide" id="page-strategy" hidden>
+  <div class="card">
+    <h2>Strategy recommendation</h2>
+    <div class="rec" id="rec"></div>
+    <p class="confidence" id="confidence"></p>
+    <p class="alt" id="alt"></p>
+    <p class="alt" id="baseline"></p>
+  </div>
+
+  <div class="card">
+    <h2>Strategy comparison</h2>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Option</th><th>Win chance</th><th>Avg time lost</th></tr></thead>
+        <tbody id="rows"></tbody>
+      </table>
+    </div>
+    <p class="note">Win chance is the share of simulated races where this option lost the least time. Avg time lost is the average extra seconds over the rest of the race, including pit stops.</p>
+  </div>
+
+  <div class="card">
+    <h2>Time lost lap by lap (no surprises)</h2>
+    <svg id="chart" viewBox="0 0 600 260" role="img" aria-label="Chart of extra time lost for each strategy, lap by lap, with no Safety Car, weather change or rival move"></svg>
+    <div class="legend">
+      <span><i class="dot" style="background:#ff3b57"></i>Stay out</span>
+      <span><i class="dot" style="background:#22c55e"></i>Pit now</span>
+      <span><i class="dot" style="background:#38bdf8"></i>Pit in 5 laps</span>
+    </div>
+    <p class="note">Shows the plan if no Safety Car, weather change or rival move happens. Lines that stay lower for longer cost less time.</p>
+  </div>
+
+  <div class="card">
+    <details>
+      <summary>How PitWise works</summary>
+      <ul>
+        <li>Each analysis runs 2,000 simulated races. Random Safety Car periods, weather changes and rival pit calls happen in each race.</li>
+        <li>All four options face the same random events in each race, so the comparison is fair.</li>
+        <li>The option that loses the least time in the most races gets the recommendation.</li>
+        <li>Worn tyres cost more time each lap. Wear below about 40% costs almost nothing.</li>
+        <li>A pit stop costs 22 seconds, or 11 seconds under a Safety Car.</li>
+        <li>Dry tyres in the rain lose 1.2 seconds per lap. Intermediate tyres lose 0.1 seconds per lap.</li>
+        <li>A rival pit call adds 2 seconds to staying out, as a rough guess for losing track position.</li>
+        <li>These are assumptions chosen for this prototype, not measured Formula 1 data.</li>
+      </ul>
+    </details>
+  </div>
+
+  <div class="page-actions page-wide-actions">
+    <button type="button" class="ghost" data-go="conditions">← Change conditions</button>
+    <button type="button" class="primary" data-go="demo">Next: demo &amp; guide →</button>
+  </div>
+</section>
+
+<!-- Page 5: demo video and how to use the website -->
+<section class="page page-narrow" id="page-demo" hidden>
+  <div class="card">
+    <h2>Demo video</h2>
+    <video class="demo-video" controls preload="metadata" playsinline aria-describedby="demo-text">
+      <source src="demo.mp4" type="video/mp4">
+      Your browser does not support the video tag. Read the steps below instead.
+    </video>
+  </div>
+
+  <div class="card" id="demo-text">
+    <h2>How to use PitWise</h2>
+    <ol class="steps">
+      <li><strong>Log in.</strong> Enter your driver name (and team, optional). Your name appears at the top right.</li>
+      <li><strong>Race dashboard.</strong> See the lap, position, tyre wear, weather, Safety Car and rival status at a glance.</li>
+      <li><strong>Race conditions.</strong> Set the current lap, your position, tyre wear, weather, Safety Car and rival pit call.</li>
+      <li><strong>Analyse race.</strong> Press the button. PitWise runs 2,000 simulated races and opens the strategy page.</li>
+      <li><strong>Strategy page.</strong> Read the recommendation and the win chances. A higher win chance means that option lost the least time in more races.</li>
+      <li><strong>Log out.</strong> Use the Log out button at the top right when you finish.</li>
+    </ol>
+    <p class="note">Tip: add your recording as <code>demo.mp4</code> in the same folder as <code>index.html</code>.</p>
+  </div>
+
+  <div class="page-actions">
+    <button type="button" class="ghost" data-go="dashboard">← Dashboard</button>
+  </div>
+</section>
+
+<script src="script.js"></script>
+</body>
+</html>
